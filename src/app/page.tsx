@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
 import { VoteForm } from "./components/VoteForm";
 import { Results } from "./components/Results";
 
@@ -17,6 +18,7 @@ export default function Home() {
   const tally = useQuery(api.votes.tally);
   const votes = useQuery(api.votes.list);
   const cast = useMutation(api.votes.cast);
+  const remove = useMutation(api.votes.remove);
 
   const [view, setView] = useState<View>({ mode: "form" });
 
@@ -27,6 +29,10 @@ export default function Home() {
       </main>
     );
   }
+
+  const handleRemove = async (id: Id<"votes">) => {
+    await remove({ id, secret: PEEK_KEYWORD });
+  };
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6 py-16">
@@ -61,7 +67,9 @@ export default function Home() {
           </>
         )}
 
-        {view.mode === "peek" && <Results tally={tally} votes={votes} />}
+        {view.mode === "peek" && (
+          <Results tally={tally} votes={votes} onRemove={handleRemove} />
+        )}
       </div>
     </main>
   );

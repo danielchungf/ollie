@@ -52,3 +52,13 @@ export const cast = mutation({
     });
   },
 });
+
+export const remove = mutation({
+  args: { id: v.id("votes"), secret: v.string() },
+  handler: async (ctx, args) => {
+    if (args.secret !== "verresultados") {
+      throw new Error("No autorizado.");
+    }
+    await ctx.db.delete(args.id);
+  },
+});

@@ -1,16 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import { Doc } from "../../../convex/_generated/dataModel";
+import { Doc, Id } from "../../../convex/_generated/dataModel";
 
 type Tally = { boy: number; girl: number; total: number };
 
 export function Results({
   tally,
   votes,
+  onRemove,
 }: {
   tally: Tally;
   votes: Doc<"votes">[];
+  onRemove?: (id: Id<"votes">) => void | Promise<void>;
 }) {
   const { boy, girl, total } = tally;
   const boyPct = total === 0 ? 0 : Math.round((boy / total) * 100);
@@ -36,11 +38,13 @@ export function Results({
             guess="boy"
             label="Niño"
             voters={votes.filter((v) => v.guess === "boy")}
+            onRemove={onRemove}
           />
           <VoterColumn
             guess="girl"
             label="Niña"
             voters={votes.filter((v) => v.guess === "girl")}
+            onRemove={onRemove}
           />
         </div>
       )}
@@ -52,10 +56,12 @@ function VoterColumn({
   guess,
   label,
   voters,
+  onRemove,
 }: {
   guess: "boy" | "girl";
   label: string;
   voters: Doc<"votes">[];
+  onRemove?: (id: Id<"votes">) => void | Promise<void>;
 }) {
   return (
     <div className="flex flex-col gap-3">
@@ -78,11 +84,21 @@ function VoterColumn({
           voters.map((vote) => (
             <li
               key={vote._id}
-              className="border-b border-border-tertiary py-2 text-center last:border-b-0"
+              className="flex items-center justify-center gap-2 border-b border-border-tertiary py-2 last:border-b-0"
             >
               <span className="body-regular text-content-primary">
                 {vote.name}
               </span>
+              {onRemove && (
+                <button
+                  type="button"
+                  onClick={() => onRemove(vote._id)}
+                  aria-label={`Eliminar ${vote.name}`}
+                  className="flex h-5 w-5 items-center justify-center rounded-full text-content-quaternary transition-colors hover:bg-bg-tertiary hover:text-red-600"
+                >
+                  ×
+                </button>
+              )}
             </li>
           ))
         )}
